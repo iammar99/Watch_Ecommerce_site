@@ -1,0 +1,131 @@
+// ---------------------------- Product Heating Container  ---------------------------- 
+.cartHeading-container {
+    border-bottom: 1px solid;
+
+    th {
+        font-size: 25px;
+        font-weight: 700;
+        color: grey;
+        margin: 0 auto;
+    }
+}
+
+.table {
+    width: 90%;
+    margin: 0 auto;
+}
+
+// ---------------------------- Product card ---------------------------- 
+
+
+
+.product-price {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.quantity {
+    display: flex;
+
+    i {
+        cursor: pointer;
+    }
+}
+
+.delete-btn {
+    cursor: pointer;
+    margin: 10px 0 auto 28px;
+}
+
+
+
+
+// ----------------------- update Btn -----------------------
+
+button.update-coupen {
+    border: 1px solid black;
+    background: white;
+    color: black;
+    font-size: 20px;
+    font-weight: 600;
+    padding: 10px 30px;
+    margin: 16px 20px;
+    transition: all .5s ease-in-out;
+}
+
+button.update-coupen:hover {
+    border: 0;
+    background: black;
+    color: white;
+}
+
+// ---------------------------- Checkout Detail ---------------------------- 
+.detail-card {
+    width: 40%;
+    min-height: 350px;
+    margin: 20px 0px 10px auto;
+    border-radius: 20px;
+    padding: 20px 60px;
+    box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+}
+
+
+// ----------------------- Checkout Btn -----------------------
+
+button.checkout-confirmation {
+    border: 0;
+    background: black;
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+    padding: 10px 30px;
+    margin: 16px 0px;
+    transition: all .5s ease-in-out;
+}
+
+button.checkout-confirmation:hover {
+    border: 1px solid black;
+    background: white;
+    color: black;
+}
+
+// ---------------------------- Media Queries ---------------------------- 
+
+@media screen and (max-width:991px) {
+    .detail-card {
+        min-width: 60%
+    }
+}
+
+@media screen and (max-width:771px) {
+    .detail-card {
+        margin: 20px auto;
+        min-width: 100%
+    }
+
+    tr {
+        position: relative;
+        margin: 30px 0px;
+    }
+
+    .delete-btn {
+        position: relative;
+        left: 75%;
+    }
+}
+
+
+@media screen and (max-width:551px) {
+    thead.cartHeading-container {
+        display: none;
+    }
+
+    .table {
+        width: 100%;
+    }
+
+    tr {
+        width: 100%;
+        margin: 20px 0;
+    }
+}

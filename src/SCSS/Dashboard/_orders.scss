@@ -1,0 +1,68 @@
+$status-color : black;
+
+// ------------------------ Order card ------------------------
+.order-diplay-card {
+  min-height: 300px;
+  border-radius: 11px;
+  width: 100%;
+  transition: .3s all ease;
+  padding: 10px 10px;
+}
+
+// .order-diplay-card:hover {
+//     background-color: rgb(129, 129, 129);
+// }
+
+// ------------------------ Order Title ------------------------
+
+.order-title {
+  background-color: black;
+  color: white;
+  height: 53px;
+  border-radius: 7px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0px 10px;
+  font-size: 23px;
+  font-family: sans-serif;
+  text-transform: capitalize;
+}
+
+// ------------------------ Order Image ------------------------
+
+.order-img {
+  height: 192px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  background: lightgrey;
+}
+
+// ------------------------ Order Status ------------------------
+
+
+.order-status {
+  display: flex;
+  width: 79%;
+  align-items: center;
+}
+
+.status-btns {
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  button {
+    padding: 4px 10px;
+    border: 1px solid black;
+    margin: 8px 0px;
+    font-size: 16px;
+    font-weight: 700;
+    transition: all .3s ease-in-out;
+  }
+  button:hover{
+    color: white;
+    background-color: black;
+  }
+}
+

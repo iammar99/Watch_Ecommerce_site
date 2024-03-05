@@ -1,0 +1,37 @@
+// -------------- Components --------------
+@import './SCSS/Components/bootstrap';
+@import "../node_modules/react-super-responsive-table/dist/SuperResponsiveTableStyle.css";
+@import "./SCSS/Components/product-loader";
+@import './SCSS/Components/ScreenLoader';
+@import "./SCSS/Components/button-loader";
+@import "./SCSS/Components/smallBtnLoader";
+@import './SCSS/Components/footer';
+@import './SCSS/Components/header';
+// -------------- Auth --------------
+@import "./SCSS/Auth/auth";
+// -------------- Dashboard --------------
+@import "./SCSS/Dashboard/add-product";
+@import "./SCSS/Dashboard/orders";
+@import "./SCSS/Dashboard/cart";
+@import "./SCSS/Dashboard/profile";
+@import "./SCSS/Dashboard/checkout";
+// -------------- Frontend --------------
+@import "./SCSS/Frontend/product-detail";
+@import "./SCSS/Frontend/product";
+@import "./SCSS/Frontend/aboutUs";
+@import "./SCSS/Frontend/myProducts";
+@import "./SCSS/Frontend/home";
+@import "./SCSS/Frontend/help-center";
+
+#root{
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+main{
+    flex: 1 0 auto;
+}
+
+::-webkit-scrollbar{
+    display : none;
+}

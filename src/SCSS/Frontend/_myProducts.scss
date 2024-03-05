@@ -1,0 +1,143 @@
+.myProduct-card {
+    width: 90%;
+    margin: 10px auto;
+    min-height: 150px;
+    border-radius: 10px;
+    display: flex;
+    align-items: end;
+    // justify-content: space-between;
+    background: #ccc;
+
+    // Glass Morphism
+    // background: rgba(225, 225, 225, 0.2);
+    // box-shadow: 0 4px 30px rgba(225, 225, 225, 0.2);
+    // border-radius: 10px;
+    // -webkit-backdrop-filter: blur(5px);
+    // backdrop-filter: blur(5px);
+    .imgBox {
+        width: 200px;
+        height: 150px;
+
+        img {
+            width: 100%;
+            height: 150px;
+        }
+    }
+
+    .product-data {
+        /* background: blue; */
+        height: 150px;
+        min-width: 24%;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-evenly;
+        flex-direction: column;
+    }
+}
+
+// Title
+
+.title {
+    b {
+        font-size: 38px;
+        font-weight: 400;
+        text-transform: capitalize;
+    }
+}
+
+// Decription
+
+.description {
+    p {
+        font-weight: 400;
+        font-size: 18px;
+    }
+}
+
+// Price
+
+.price {
+    b {
+        font-weight: 900;
+        font-size: 25px;
+        color: orange;
+        font-family: cursive;
+    }
+}
+
+// Buttons
+
+.product-buttons {
+    display: flex;
+    justify-content: space-around;
+    width: 20%;
+    margin-bottom: 2%;
+}
+
+button.btn.myProduct-delete-btn {
+    background: #333;
+    color: white;
+    border-radius: 0;
+}
+
+button.btn.myProduct-delete-btn:hover {
+    background: #000;
+}
+
+button.btn.myProduct-edit-btn {
+    border: 2px solid black;
+    border-radius: 0px;
+    padding: 3px 25px;
+    transition: all .3s ease-in-out;
+}
+
+button.btn.myProduct-edit-btn:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+
+// -------------------- Edit Modal --------------------
+
+.modal-body {
+    input {
+        outline: 1px solid;
+        height: 48px;
+    }
+
+    label {
+        font-size: 23px;
+        font-weight: 600;
+    }
+}
+
+
+// --------------------  Media Queries --------------------
+
+@media screen and (max-width:771px) {
+    .myProduct-card {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width:600px) {
+    .myProduct-card {
+        flex-direction: column;
+        width: fit-content;
+        align-items: baseline;
+        padding: 0px 40px;
+        .imgBox {
+            width: 100%;
+
+            img {
+                width: 100%;
+            }
+        }
+    }
+
+    .product-buttons {
+        justify-content: space-evenly;
+        margin: 15px auto;
+        width: 100%;
+    }
+}

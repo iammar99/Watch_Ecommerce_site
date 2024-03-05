@@ -1,0 +1,43 @@
+.mainProfile {
+    justify-content: space-evenly;
+    width: 28%;
+    align-items: center;
+
+    img {
+        width: 55px;
+    }
+}
+ 
+
+// ----------------- Order Container ----------------- 
+
+.order-card,
+.wallet-card {
+    width: 100%;
+    height: 130px;
+    transition: 0.3s all ease-in-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: x-large;
+    border-radius: 10px;
+    span{
+        color: black;
+    }
+}
+
+a.add-product {
+    text-decoration: none;
+    color: black;
+}
+
+span.amount {
+    font-size: 61px;
+    color: orange;
+    font-weight: 800;
+}
+
+.order-card:hover {
+    background: #a9a9a9;
+}

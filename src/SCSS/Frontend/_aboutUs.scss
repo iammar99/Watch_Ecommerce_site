@@ -1,0 +1,41 @@
+img.about-us-img {
+    width: 500px;
+    height: 333px;
+}
+
+.about-heading {
+    font-weight: 900;
+}
+
+.team-card {
+    min-height: 350px;
+    border-radius: 12px;
+    background-color: lightgrey;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    img {
+        width: 100%;
+        height: 250px;
+    }
+    span {
+        text-align: center;
+        width: 100%;
+        display: block;
+        color: red;
+        font-size: 16px;
+    }
+    
+}
+
+@media screen and (max-width:991px) {
+    img.about-us-img {
+        width: 100%;
+    }
+}
+
+
+
+// ----------- Rate Us -----------
+iframe{
+    width: 100vw;
+    height: 100vh;
+}

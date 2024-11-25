@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { useAuthContext } from 'Context/AuthContext'
 // ---------------------- Firebase ----------------------
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc , getDoc } from "firebase/firestore";
 import { fireStore } from 'Config/firebase';
 import ButtonLoader from 'Components/ButtonLoader/ButtonLoader';
 import { message } from 'antd';
+import { useCartContext } from 'Context/CartContext';
+// ---------------------- For notifying user ----------------------
+import emailjs from 'emailjs-com';
+
+
 
 export default function Checkout() {
 
@@ -15,66 +20,99 @@ export default function Checkout() {
   // const [productsToOrder, setProductsToOrder] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState("")
+  const { cart, setCart } = useCartContext()
+  // -------------------- Messaging  ---------------------
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [userID, setUserID] = useState('');
 
-  let userId = user.ID
-  const dateCreated = new Date
-  // -------------------- OrderId  ---------------------
-  let billId = localStorage.getItem("order-id")
+  emailjs.init('715ijZbzCUnGRIiLh');  // Your EmailJS user ID
+
+  let userId = user.ID;
+  const dateCreated = new Date();
+  let billId = localStorage.getItem("order-id");
 
   const fetchData = () => {
-    setDetails(JSON.parse(localStorage.getItem("checkout-details")))
-    setProducts(JSON.parse(localStorage.getItem(user.ID + "-cart")))
-  }
+    setDetails(JSON.parse(localStorage.getItem("checkout-details")));
+    setProducts(JSON.parse(localStorage.getItem(user.ID + "-cart")));
+  };
 
   useEffect(() => {
-    fetchData()
-    document.getElementById("fullName").setAttribute('value', user.fullName)
-  }, [])
+    fetchData();
+    document.getElementById("fullName").setAttribute('value', user.fullName);
+  }, []);
 
   const handleChange = (e) => {
-    // setProductsToOrder(...products)
-    setBill(s => ({ ...s, orderedBy: userId, [e.target.name]: e.target.value, paymentMethod, products, dateCreated, id: billId }))
-  }
-
+    setBill(s => ({ ...s, orderedBy: userId, [e.target.name]: e.target.value, paymentMethod, products, dateCreated, id: billId }));
+  };
 
   const handleOrder = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    // --------------------- Address Checking ---------------------
-
+    // Address checking
     if (!bill.address || !bill.country || !bill.city) {
-      message.warning("Enter your Address")
+      message.warning("Enter your Address");
+      return;
     }
-    else {
 
-      // --------------------- Number Checking ---------------------
-
-      if (!bill.number) {
-        message.warning("Enter your Phone Number")
-      }
-      else {
-
-        // --------------------- Payment method Checking ---------------------
-
-        if (!paymentMethod) {
-          message.warning("Tell Your Payment Method")
-        }
-        else {
-          // try{
-          setIsLoading(true)
-          await setDoc(doc(fireStore, "Orders", billId), bill);
-          localStorage.removeItem("checkout-details")
-          localStorage.removeItem("product-detail")
-          localStorage.removeItem(user.ID + "-cart")
-          localStorage.removeItem( "order-id")
-          message.success('Ordered  Successfully')
-          // console.log(bill)
-          setIsLoading(false)
-        }
-      }
-
+    // Number checking
+    if (!bill.number) {
+      message.warning("Enter your Phone Number");
+      return;
     }
-  }
+
+    // Payment method checking
+    if (!paymentMethod) {
+      message.warning("Tell Your Payment Method");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      // Save to Firestore
+      await setDoc(doc(fireStore, "Orders", billId), bill);
+
+      // Iterate through products to send emails to owners
+      for (const product of products) {
+        const ownerId = product.createdBy;
+
+        // Fetch the owner data from Firestore using the createdBy ID
+        const userDoc = await getDoc(doc(fireStore, "Users", ownerId));
+        if (userDoc.exists()) {
+          const ownerData = userDoc.data();
+          const ownerEmail = ownerData.email;
+          const ownerName = ownerData.fullName;
+          
+          // EmailJS configuration
+          const serviceID = 'service_7oxjg4k';
+          const templateID = 'template_4bxt4zp';
+          const templateParams = {
+            message: `Hello ${ownerName}, You have received an order for your product "${product.title}".`,
+            recipient_email: ownerEmail,    // Owner's email
+            from_name: "Ammar's Store",      // Store name (can be dynamic)
+          };
+
+          // Send email using EmailJS
+          const response = await emailjs.send(serviceID, templateID, templateParams, '715ijZbzCUnGRIiLh');
+        } else {
+          console.log('Owner data not found for user ID:', ownerId);
+        }
+      }
+      // Clear local storage and other actions after email is sent
+      localStorage.removeItem("checkout-details");
+      localStorage.removeItem("product-detail");
+      localStorage.removeItem(user.ID + "-cart");
+      localStorage.removeItem("order-id");
+      setCart([]);
+      message.success('Order placed successfully');
+    } catch (error) {
+      message.error('Failed to place order. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
 
   return (

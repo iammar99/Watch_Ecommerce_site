@@ -24,8 +24,8 @@ export default function Home() {
 
     let user = localStorage.getItem("User")
     if (user) {
-      user = JSON.parse(user)
-      let userId = user.ID
+        user = JSON.parse(user)
+        let userId = user.ID
     }
 
     const fetchData = useCallback(async () => {
@@ -35,13 +35,14 @@ export default function Home() {
         querySnapshot.forEach((doc) => {
             let data = doc.data()
             array.push(data)
-            setIsProcessing(false)
         });
-        let arrayToAdd = []
+        let newArr = []
         for (let i = 0; i < 3; i++) {
-            arrayToAdd.push(array[i])
+            const element = array[i];
+            newArr.push(element)
         }
-        setProducts(arrayToAdd)
+        setProducts(newArr)
+        setIsProcessing(false)
     })
 
     useEffect(() => {
@@ -50,7 +51,7 @@ export default function Home() {
 
 
     const handleCart = async (product) => {
-        if(user){
+        if (user) {
             localStorage.setItem("product-detail", JSON.stringify(product))
         }
     }
@@ -79,7 +80,7 @@ export default function Home() {
 
             {/* -------------- Top Products -------------- */}
 
-            <h1 className="text-center my-5" style={{"fontWeight":"900","fontSize":"50px"}}>
+            <h1 className="text-center my-5" style={{ "fontWeight": "900", "fontSize": "50px" }}>
                 Top Products
             </h1>
 
@@ -88,45 +89,51 @@ export default function Home() {
                     ?
                     <Loader />
                     :
-                    <>
-                        <div className="container">
-                            <div className="row">
-                                {
-                                    products.map((product, i) => {
-                                        return (
-                                            <div className="col-12  col-md-6 col-lg-4" key={i}>
-                                                <div className="card" >
-                                                    <div className="imgBox">
-                                                        <img
-                                                            src={product.imageUrl}
-                                                        />
-                                                    </div>
-                                                    <div className="contentBox">
-                                                        <h3>{product.title}</h3>
-                                                        <h2 className="price">
-                                                            ${product.currentPrice}
-                                                        </h2>
-                                                        <Link to={!user?"/auth/":"/product-detail"} onClick={() => { handleCart(product) }}>
-                                                            <button className="buy" >
-                                                                Product Details
-                                                            </button>
-                                                        </Link>
+                    products.length == 0
+                        ?
+                        <h1 className='text-center fw-bold'>
+                            No Products Found!
+                        </h1>
+                        :
+                        <>
+                            <div className="container">
+                                <div className="row">
+                                    {
+                                        products.map((product, i) => {
+                                            return (
+                                                <div className="col-12  col-md-6 col-lg-4" key={i}>
+                                                    <div className="card" >
+                                                        <div className="imgBox">
+                                                            <img
+                                                                src={product.imageUrl}
+                                                            />
+                                                        </div>
+                                                        <div className="contentBox">
+                                                            <h3>{product.title}</h3>
+                                                            <h2 className="price">
+                                                                ${product.currentPrice}
+                                                            </h2>
+                                                            <Link to={!user ? "/auth/" : "/product-detail"} onClick={() => { handleCart(product) }}>
+                                                                <button className="buy" >
+                                                                    Product Details
+                                                                </button>
+                                                            </Link>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        )
-                                    })
-                                }
+                                            )
+                                        })
+                                    }
+                                </div>
                             </div>
-                        </div>
-                        <div className="container d-flex justify-content-center">
-                            <Link to={"/product"}>
-                                <button className="browse-btn mx-auto">
-                                    Browse More
-                                </button>
-                            </Link>
-                        </div>
-                    </>
+                            <div className="container d-flex justify-content-center">
+                                <Link to={"/product"}>
+                                    <button className="browse-btn mx-auto">
+                                        Browse More
+                                    </button>
+                                </Link>
+                            </div>
+                        </>
             }
 
             {/* -------------------------------- container for image -------------------------------- */}
@@ -141,10 +148,10 @@ export default function Home() {
                             BEST SMART WATCH MANUFACTURER
                         </h1>
                         <p className="my-3">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis corrupti asperiores error labore fugiat neque!
+                            Discover a wide range of cutting-edge smartwatches designed to enhance your lifestyle with advanced features, exceptional durability, and stylish designs. Shop now and stay connected in style.
                         </p>
                         <p className="my-3">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis corrupti asperiores error labore fugiat neque!
+                            Explore our collection of top-rated smartwatches that combine performance, comfort, and elegance. Whether for fitness tracking or everyday use, find the perfect smartwatch tailored to your needs.
                         </p>
                         <div className="container d-flex justify-content-center">
                             <Link to={"/product"}>
@@ -184,7 +191,7 @@ export default function Home() {
                                     </div>
                                 </div>
                                 <p className="review">
-                                    Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nostrum, repellendus.
+                                    Wide selection, sleek designs, competitive prices, quick delivery, great experience !
                                 </p>
                             </div>
                         </div>
@@ -209,7 +216,7 @@ export default function Home() {
                                     </div>
                                 </div>
                                 <p className="review">
-                                    Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nostrum, repellendus.
+                                    User-friendly site, excellent customer service, quality smartwatches, highly recommended !
                                 </p>
                             </div>
                         </div>
@@ -234,7 +241,7 @@ export default function Home() {
                                     </div>
                                 </div>
                                 <p className="review">
-                                    Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nostrum, repellendus.
+                                    Affordable prices, trendy watches, secure checkout, timely updates, satisfied customer !
                                 </p>
                             </div>
                         </div>
@@ -261,21 +268,21 @@ export default function Home() {
                         <h6 className='mt-4'>
                             Secure Payment
                         </h6 >
-                        <p>Free Delivery on all orders</p>
+                        <p>Safe and reliable transactions</p>
                     </div>
                     <div className="col-lg-3 col-md-6 col-sm-12 pt-5">
                         <i className="fa-solid fa-money-bill-transfer" style={{ "fontSize": "xxx-large", "color": "#57667e" }}></i>
                         <h6 className='mt-4'>
                             Money Back Guarantee
                         </h6 >
-                        <p>Free Delivery on all orders</p>
+                        <p>Risk-free purchase with assurance.</p>
                     </div>
                     <div className="col-lg-3 col-md-6 col-sm-12 pt-5">
                         <i className="fa-solid fa-clock-rotate-left" style={{ "fontSize": "xxx-large", "color": "#57667e" }}></i>
                         <h6 className='mt-4'>
                             Online Support
                         </h6 >
-                        <p>Free Delivery on all orders</p>
+                        <p>24/7 assistance at your service.</p>
                     </div>
                 </div>
             </div>

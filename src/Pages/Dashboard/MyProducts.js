@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback, useState } from 'react'
 // ------------------ Firebase ------------------
 import { collection, query, where, getDocs, deleteDoc, doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytesResumable, getDownloadURL  , deleteObject} from 'firebase/storage';
 import { fireStore, storage } from 'Config/firebase';
 import { useAuthContext } from 'Context/AuthContext';
 import Loader from 'Components/ProductLoader/Loader';
@@ -30,8 +30,8 @@ export default function MyProducts() {
     querySnapshot.forEach((doc) => {
       let data = doc.data()
       array.push(data)
-      setIsProcessing(false)
     });
+    setIsProcessing(false)
     setDisplayProducts(array)
   })
 
@@ -46,6 +46,10 @@ export default function MyProducts() {
     let newProducts = displayProducts.filter((newProduct) => {
       return newProduct.id !== product.id
     })
+    const desertRef = ref(storage, `product-images/${product.imageName}`);
+    deleteObject(desertRef).then(() => {
+    }).catch((error) => {
+    });
     setDisplayProducts(newProducts)
     message.success('Deleted')
   }
@@ -144,9 +148,9 @@ export default function MyProducts() {
             {
               displayProducts.length === 0
                 ?
-                <h2>
+                <h1 className='text-center fw-bold'>
                   No Products Found !
-                </h2 >
+                </h1 >
                 :
                 <>
                   {

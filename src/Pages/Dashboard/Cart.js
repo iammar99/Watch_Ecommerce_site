@@ -5,6 +5,7 @@ import { Table, Thead, Tbody, Tr, Th, Td } from 'react-super-responsive-table'
 import 'react-super-responsive-table/dist/SuperResponsiveTableStyle.css'
 import { Link, useNavigate } from 'react-router-dom'
 import { message } from 'antd'
+import { useCartContext } from 'Context/CartContext'
 
 export default function Cart(props) {
 
@@ -14,6 +15,8 @@ export default function Cart(props) {
     const [TotalPrice, setTotalPrice] = useState(0)
     const [subTotal, setSubTotal] = useState(0)
     const [shippingPrice, setshippingPrice] = useState(0)
+    // ---------------- Cart ----------------
+    const { cart, setCart } = useCartContext()
 
     let array = []
 
@@ -108,6 +111,7 @@ export default function Cart(props) {
         array = newProducts
         setCartItems(newProducts)
         localStorage.setItem(user.ID + "-cart", JSON.stringify(array))
+        setCart(array)
         message.warning("Deleted")
     }
 

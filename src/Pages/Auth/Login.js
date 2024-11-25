@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 //  -------------  FireBase - Authentication -------------
-import { auth } from 'Config/firebase'
+import { auth , fireStore } from 'Config/firebase'
 import { signInWithEmailAndPassword } from 'firebase/auth'
+import { collection, query, where, getDocs , doc, setDoc  } from "firebase/firestore";
 //  -------------  Error Handling -------------
 import { message, notification } from 'antd';
 import { useAuthContext } from 'Context/AuthContext';
@@ -14,6 +15,7 @@ export default function Login() {
   const [show, setShow] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const { dispatch } = useAuthContext()
+  let userObj = {}
 
   const handleChange = (e) => { setState(s => ({ ...s, [e.target.name]: e.target.value })) }
 
@@ -32,20 +34,28 @@ export default function Login() {
       // ---------------------  FireBase (Authentication) ---------------------
       let { email, password, fullName } = state
       signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
+        .then(async (userCredential) => {
           const user = userCredential.user;
           let userToStore = {
             email,
             fullName,
             ID: user.uid
           }
+          const q = query(collection(fireStore, "Users"), where("ID", "==", user.uid));
+
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach((doc) => {
+            userObj = doc.data()
+            // setUserObj(doc.data())
+          });
+          // console.log(userObj)
           // Signed up 
           localStorage.setItem("Token", "True")
-          localStorage.setItem("User", JSON.stringify(userToStore))
-          dispatch({ type: "Set_Logged_In", payload: { user } })
+          localStorage.setItem("User", JSON.stringify(userObj))
+          dispatch({ type: "Set_Logged_In", payload: { userObj } })
           message.success("Login")
           setIsLoading(false)
-          
+
           // ...
         })
         .catch((error) => {

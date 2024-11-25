@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+//  -------------  FireBase - Storage -------------
+import { doc, setDoc } from 'firebase/firestore'
 //  -------------  FireBase - Authentication -------------
 import { auth } from 'Config/firebase'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
-//  -------------  FireBase - Storage -------------
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
 import { fireStore } from 'Config/firebase'
-import { doc, setDoc } from "firebase/firestore";
 //  -------------  Error Handling -------------
 import { message, notification } from 'antd';
 import { useAuthContext } from 'Context/AuthContext';
@@ -25,61 +25,112 @@ export default function Register() {
   const handleChange = (e) => { setState(s => ({ ...s, [e.target.name]: e.target.value })) }
 
   useEffect(() => {
-    if(mail){
+    if (mail) {
       document.getElementById("email").setAttribute('value', mail)
     }
   }, [])
 
   const handleRegister = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
+
     // ---------------------  Validation (Empty Fields) ---------------------
     if (!state.email || !state.fullName || !state.password || !state.confirmPassword) {
       notification.error({
         message: `Error Notification`,
-        description:
-          'Fill All the Fields',
+        description: 'Fill All the Fields',
       });
+      return;
     }
-    else {
-      // ---------------------  Validation (Password) ---------------------
-      if (state.password !== state.confirmPassword) {
-        notification.error({
-          message: 'Error Notification',
-          description:
-            "Password doesn't matched",
-        });
-      }
-      else {
-        setIsLoading(true)
-        // ---------------------  FireBase (Authentication) ---------------------
-        let { email, password, fullName } = state
-        createUserWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
-            const user = userCredential.user;
-            let userToStore = {
-              email,
-              fullName,
-              ID: user.uid
-            }
-            // Signed up 
-            localStorage.setItem("Token", "True")
-            localStorage.setItem("User", JSON.stringify(userToStore))
-            dispatch({ type: "Set_Logged_In", payload: { user } })
-            // ---------------------  FireBase (FireStore) ---------------------
-            setDoc(doc(fireStore, "Users", user.uid), userToStore);
-            message.success("Registered")
-            setIsLoading(false)
-            // ...
-          })
-          .catch((error) => {
-            setIsLoading(false)
-            message.error("An error occured")
-            // ..
-          });
-      }
+
+    // ---------------------  Validation (Password) ---------------------
+    if (state.password !== state.confirmPassword) {
+      notification.error({
+        message: 'Error Notification',
+        description: "Password doesn't matched",
+      });
+      return;
     }
-    localStorage.removeItem("Email")
-  }
+
+    setIsLoading(true);
+
+    // ---------------------  FireBase (Authentication) ---------------------
+    let { email, password, fullName } = state;
+
+    try {
+      // Step 1: Create user with email and password (but don’t proceed with the full registration)
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Step 2: Send email verification
+      await sendEmailVerification(user);
+
+      // Step 3: Inform the user to verify their email first
+      notification.info({
+        message: 'Verification Email Sent',
+        description: 'Please check your email and verify your address before proceeding.',
+      });
+
+      // Step 4: Do not log the user in yet. The user is still not verified
+      setIsLoading(false);
+
+      // Step 5: Temporarily store user data, but don’t mark them as logged in yet
+      let userToStore = {
+        email,
+        fullName,
+        ID: user.uid,
+      };
+
+      localStorage.setItem("Email", email); // Store email to track verification
+      localStorage.setItem("User", JSON.stringify(userToStore)); // Store user info temporarily
+
+      // Optionally, redirect the user to a page where they can check their inbox
+      // history.push('/check-email'); 
+
+      // Step 6: Check if the email is verified (polling mechanism)
+      await checkEmailVerification(user);
+
+    } catch (error) {
+      setIsLoading(false);
+      message.error("An error occurred while registering. Please try again.");
+    }
+  };
+
+  // Function to check email verification
+  const checkEmailVerification = async (user) => {
+    try {
+      // Poll every few seconds to check if the email is verified
+      let emailVerified = user.emailVerified;
+
+      while (!emailVerified) {
+        // Wait for 3 seconds and check again
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        user.reload(); // Reload the user object to get updated status
+        emailVerified = user.emailVerified;
+      }
+
+      // Once verified, complete the registration
+      handleUserVerified(user);
+
+    } catch (error) {
+      message.error("An error occurred while checking email verification.");
+    }
+  };
+
+  // Function to complete user registration after email verification
+  const handleUserVerified = async (user) => {
+    try {
+      let userInfo = JSON.parse(localStorage.getItem("User"));
+      await setDoc(doc(fireStore, "Users", user.uid), userInfo);
+      dispatch({ type: "Set_Logged_In", payload: { user } });
+      localStorage.removeItem("Email");
+
+      message.success("Registered Successful")
+    } catch (error) {
+      message.error("Failed to complete registration.");
+    }
+  };
+
+
 
   // --------------- Password Show / Hide ---------------
 
@@ -198,10 +249,10 @@ export default function Register() {
             <button className="btn btn-secondary d-block ms-auto" onClick={handleRegister}>
               {
                 isLoading
-                ?
-                <ButtonLoader/>
-                :
-                "Register"
+                  ?
+                  <ButtonLoader />
+                  :
+                  "Register"
               }
             </button>
           </div>

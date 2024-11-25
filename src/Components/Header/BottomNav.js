@@ -9,6 +9,7 @@ import { auth } from 'Config/firebase'
 import { message } from 'antd';
 //  -------------  Auth Context -------------
 import { useAuthContext } from 'Context/AuthContext'
+import { useCartContext } from 'Context/CartContext'
 
 
 export default function BottomNav() {
@@ -17,6 +18,7 @@ export default function BottomNav() {
   const [isChecked, setIsChecked] = useState(false)
   const { isAuth } = useAuthContext()
   const { dispatch } = useAuthContext()
+  const { cart, setCart } = useCartContext()
 
   let user = localStorage.getItem("User")
   user = JSON.parse(user)
@@ -50,6 +52,18 @@ export default function BottomNav() {
     setIsChecked(!isChecked)
   }
 
+  const CartSytle = {
+    "margin": "0",
+    "background": "white",
+    "color": "black",
+    "width": "20px",
+    "height": "22px",
+    "textAlign": "center",
+    "borderRadius": "50%",
+    "position": "relative",
+    "top": "-43%"
+  }
+
   return (
     <>
       <div className='bottom-container'>
@@ -72,16 +86,29 @@ export default function BottomNav() {
             </div>
 
             <div className="col text-center">
-              <img src={logo} className='bottomNav-logo' alt=""  />
+              <img src={logo} className='bottomNav-logo' alt="" />
             </div>
             <div className="col text-end">
-              <nav>
+              <nav className='d-flex'>
                 <Link>
                   <i className="fa-solid fa-magnifying-glass text-md-end" style={{ color: "#ffffff" }} />
                 </Link>
-                <Link to={"/dashboard/cart"} className='d-none d-md-inline'>
+                <Link to={"/dashboard/cart"} className='d-none d-md-flex'>
                   <i className="fa-solid fa-cart-shopping" style={{ color: "#ffffff" }} >
                   </i>
+                  {
+                    cart
+                      ?
+                      <>
+                        {cart.length
+                          ?
+                          <p style={CartSytle}>{cart.length}</p>
+                          :
+                          <></>}
+                      </>
+                      :
+                      <></>
+                  }
                 </Link>
                 <Link to={"/dashboard/profile"} className='d-none d-md-inline'>
                   <span className="profile" >

@@ -14,7 +14,7 @@ export default function TopNav() {
         Sales Ends in:
       </h5>
       <div className='text-light'>
-        <CountdownTimer targetDate="2024-03-18T00:00:00" />
+        <CountdownTimer targetDate="2025-01-01T00:00:00" />
       </div>
     </div>
   )

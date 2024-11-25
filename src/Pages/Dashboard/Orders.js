@@ -284,7 +284,7 @@ export default function Orders() {
                                   </b>
                                 </span>
                                 &nbsp;
-                                <span>
+                                <span>$
                                   {
                                     !order.total
                                       ?

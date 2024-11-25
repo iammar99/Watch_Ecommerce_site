@@ -13,6 +13,7 @@ import { message } from 'antd';
 //  -------------  Auth Context -------------
 import { useAuthContext } from 'Context/AuthContext'
 import ButtonLoader from 'Components/ButtonLoader/ButtonLoader';
+import { useCartContext } from 'Context/CartContext';
 
 
 
@@ -24,6 +25,7 @@ export default function Profile() {
   const { dispatch } = useAuthContext()
   const [fullName, setFullName] = useState("")
   const [userName, setUserName] = useState("")
+  const { order  , fetchData} = useCartContext()
 
   let user = localStorage.getItem("User")
   user = JSON.parse(user)
@@ -37,6 +39,7 @@ export default function Profile() {
   useEffect(() => {
     setUserName(username)
     document.getElementById("fullname").setAttribute('value', username)
+    fetchData()
   }, [])
 
 
@@ -137,6 +140,26 @@ export default function Profile() {
   }
 
 
+  // --------------------- Style ------------------
+
+
+  const OrderCountStyle = {
+    "background": "red",
+    "width": "18px",
+    "height": "18px",
+    "color": "white",
+    "borderRadius": "50%",
+    "fontSize": "12px",
+    "display": "flex",
+    "justifyContent": "center",
+    "alignItems": "center",
+    "position": "relative",
+    "bottom": "60%",
+    "left": "8%",
+    "fontWeight": "800"
+  }
+
+
 
   return (
     <main id='main'>
@@ -151,7 +174,7 @@ export default function Profile() {
           <button className="btn btn-danger " onClick={handleLogout}>
             Logout
           </button>
-          <i className="fa-solid fa-pencil ms-2" style={{ color: "#000000" , "cursor":"pointer"}} data-bs-toggle="modal" data-bs-target="#exampleModal" />
+          <i className="fa-solid fa-pencil ms-2" style={{ color: "#000000", "cursor": "pointer" }} data-bs-toggle="modal" data-bs-target="#exampleModal" />
         </div>
       </div>
 
@@ -320,14 +343,14 @@ export default function Profile() {
           </div>
           <div className="col-xs-12 col-sm-6 col-md-3">
             <Link to={"/help-center"}>
-            <div className="order-card">
-              <span>
-                <i className="fa-regular fa-circle-question" style={{ color: "#000000" }} />
-              </span>
-              <span>
-                Help Center
-              </span>
-            </div>
+              <div className="order-card">
+                <span>
+                  <i className="fa-regular fa-circle-question" style={{ color: "#000000" }} />
+                </span>
+                <span>
+                  Help Center
+                </span>
+              </div>
             </Link>
           </div>
           <div className="col-xs-12 col-sm-6 col-md-3">
@@ -339,6 +362,15 @@ export default function Profile() {
                 <span>
                   Orders
                 </span>
+                {
+                  order.length
+                  ?
+                  <span className="count" style={OrderCountStyle}>
+                    {order.length}
+                  </span>
+                  :
+                  ""
+                }
               </div>
             </Link>
           </div>

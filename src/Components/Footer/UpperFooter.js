@@ -1,18 +1,20 @@
+import { useAuthContext } from 'Context/AuthContext'
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 export default function UpperFooter() {
 
   const [email , setEmail] = useState("")
+  const isAuth = useAuthContext()
+  let auth = isAuth.isAuth  
 
   const handleChange = (e) => {setEmail(s=>({...s,[e.target.name]:e.target.value}))}
   
   const navigate = useNavigate()
   const handleSubmit = () => {
     localStorage.setItem("Email",email.email)
-    console.log('email', email)
     navigate("/auth/register")
-  }
+  } 
   return (
     <>
       <div className="container" style={{ "flex": "1 0 auto" }}>
@@ -39,11 +41,11 @@ export default function UpperFooter() {
             </p>
             <div className="input-container">
               <input
-                required=""
                 placeholder="Email Address"
                 type="email"
                 name='email'
                 onChange={handleChange}
+                disabled={auth}
               />
               <button className="invite-btn" type="button" onClick={handleSubmit}>
                 Invite

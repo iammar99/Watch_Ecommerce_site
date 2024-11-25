@@ -1,6 +1,7 @@
 import { useAuthContext } from 'Context/AuthContext'
 import React, { useEffect, useState } from 'react'
 import { message } from 'antd'
+import { useCartContext } from 'Context/CartContext';
 
 export default function ProductDetail() {
 
@@ -8,16 +9,18 @@ export default function ProductDetail() {
     const [quantity, setQuantity] = useState(1)
     const [total, setTotal] = useState(0)
     const { user } = useAuthContext()
+    // ---------------- Cart ----------------
+    const { cart, setCart } = useCartContext()
 
     let userId = user.ID
     let id = localStorage.getItem("order-id")
     let billId
-    if(!id){
-         billId = Math.random().toString(36).slice(2)
-         localStorage.setItem("order-id" , billId)
+    if (!id) {
+        billId = Math.random().toString(36).slice(2)
+        localStorage.setItem("order-id", billId)
     }
-    else{
-        billId  = id
+    else {
+        billId = id
     }
 
     let cartArray = []
@@ -63,12 +66,16 @@ export default function ProductDetail() {
                         orderId: billId
                     }
                     cartArray.push(productToAdd)
+                    setCart([...cart, productToAdd])
                 }
-                let productToAdd = {
-                    ...product,
-                    orderId: billId
+                else {
+                    let productToAdd = {
+                        ...product,
+                        orderId: billId
+                    }
+                    cartArray.push(productToAdd)
+                    setCart([...cart, productToAdd])
                 }
-                cartArray.push(productToAdd)
                 localStorage.setItem(userId + "-cart", JSON.stringify(cartArray))
                 // console.log('productToAdd', productToAdd)
                 message.success("Added")

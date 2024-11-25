@@ -10,93 +10,136 @@ import ButtonLoader from 'Components/ButtonLoader/ButtonLoader';
 
 export default function AddProduct() {
 
-    const [state, setState] = useState({})
-    const [file, setFile] = useState(null)
-    const [image, setImage] = useState(null)
-    const [isLoading, setIsLoading] = useState(false)
+    const [state, setState] = useState({});
+    const [file, setFile] = useState(null);
+    const [image, setImage] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    let user = localStorage.getItem("User");
+    user = JSON.parse(user);
+    let userId = user.ID;
+
+    let imageUrl;
+    let productToStore;
 
 
-    let user = localStorage.getItem("User")
-    user = JSON.parse(user)
-    let userId = user.ID
+    // ------------ Remove Background -------------
+    const removeBackground = async (file) => {
+        const formData = new FormData();
+        formData.append("image_file", file);
+        formData.append("size", "auto");
 
-    let imageUrl
-    let productToStore
+        try {
+            const response = await fetch("https://api.remove.bg/v1.0/removebg", {
+                method: "POST",
+                headers: {
+                    "X-Api-Key": process.env.REACT_APP_REMOVE_BG_API_KEY
+                },
+                body: formData,
+            });
 
-    // ------------- Image Input ------------- 
+            if (response.status !== 200) {
+                throw new Error("Failed to remove background");
+            }
 
-    const handleImage = (e) => {
-        setFile(e.target.files[0])
-        setImage(URL.createObjectURL(e.target.files[0]));
-    }
+            const blob = await response.blob();
+            return blob;
+        } catch (error) {
+            console.error("Error removing background:", error);
+            message.error("Failed to remove background.");
+            return null;
+        }
+    };
 
-    // ------------- Others Input ------------- 
+    // ------------ Handle Image Input -------------
+    const handleImage = async (e) => {
+        const uploadedFile = e.target.files[0];
+        setFile(uploadedFile);
 
-    const handleChange = (e) => setState(s => ({ ...s, [e.target.name]: e.target.value }))
+        const processedBlob = await removeBackground(uploadedFile);
 
-    // ------------- Upload Image ------------- 
+        if (processedBlob) {
+            // Create a new File object from the Blob and assign a name
+            const processedFile = new File([processedBlob], uploadedFile.name, { type: processedBlob.type });
 
+            // Update states with the processed file
+            setImage(URL.createObjectURL(processedFile));
+            setFile(processedFile);
+        }
+    };
+
+
+    // ------------ Handle Other Inputs -------------
+    const handleChange = (e) =>
+        setState((s) => ({ ...s, [e.target.name]: e.target.value }));
+
+    // ------------ Upload Image to Firebase Storage -------------
     const uploadFile = async () => {
-        const storageRef = ref(storage, 'product-images/' + file.name);
+        const storageRef = ref(storage, "product-images/" + file.name);
         const uploadTask = uploadBytesResumable(storageRef, file);
+        setIsLoading(true)
 
-        // Register three observers:
-        // 1. 'state_changed' observer, called any time the state changes
-        // 2. Error observer, called on failure
-        // 3. Completion observer, called on successful completion
-        uploadTask.on('state_changed',
+        uploadTask.on(
+            "state_changed",
             (snapshot) => {
-                // Observe state change events such as progress, pause, and resume
-                // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
                 const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('Upload is ' + progress + '% done');
+                console.log("Upload is " + progress + "% done");
+            },
+            (error) => {
+                console.error("Error uploading file:", error);
+                message.error("Image upload failed.");
             },
             () => {
-                // Handle unsuccessful uploads
-            },
-            () => {
-                // Handle successful uploads on complete
-                // For instance, get the download URL: https://firebasestorage.googleapis.com/...
                 getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                    // setIsLoading(true)
-                    console.log('File available at', downloadURL);
-                    imageUrl = downloadURL
-                    let prdouctID = Math.random().toString(36).slice(2, 13);
-                        productToStore = {
-                            title: state.title,
-                            currentPrice: state.currentPrice,
-                            description: state.description,
-                            imageUrl: imageUrl,
-                            createdBy: userId,
-                            id: prdouctID ,
-                        }
-                        setDoc(doc(fireStore, "Products", prdouctID), productToStore);
-                        message.success("Product Added")
-                        // setIsLoading(false)
+                    imageUrl = downloadURL;
+                    let productID = Math.random().toString(36).slice(2, 13);
+                    productToStore = {
+                        title: state.title,
+                        currentPrice: state.currentPrice,
+                        description: state.description,
+                        imageUrl: imageUrl,
+                        createdBy: userId,
+                        id: productID,
+                        imageName: file.name
+                    };
+
+                    setDoc(doc(fireStore, "Products", productID), productToStore)
+                        .then(() => {
+                            message.success("Product Added");
+                        })
+                        .catch((error) => {
+                            console.error("Error storing product:", error);
+                            message.error("Failed to store product.");
+                        })
                 });
             }
         );
+        setIsLoading(false)
+    };
 
-    }
-
-    // ------------- Submit Product ------------- 
-
+    // ------------ Submit Product -------------
     const handleProduct = (e) => {
-        e.preventDefault()
-        if (image === null) {
-            message.error("Add Image Of Your Product")
+        e.preventDefault();
+        if (!image) {
+            message.error("Add an image of your product");
+        } else if (!state.title || !state.currentPrice || !state.description) {
+            message.error("Add all required fields");
+        } else {
+            setIsLoading(true);
+            uploadFile();
+            setIsLoading(false);
         }
-        else {
-            if (!state.title || !state.currentPrice ||  !state.description) {
-                message.error("Add other fields")
-            }
-            else {
-                setIsLoading(true)
-                uploadFile()
-                setIsLoading(false)
-            }
-        }
+    };
+
+    const myStyle = {
+        // Remove spinners in Chrome, Edge, and Safari
+        WebkitAppearance: 'none',
+        MozAppearance: 'textfield',
+        appearance: 'textfield',
+        margin: 0,
     }
+
+
 
 
     return (
@@ -106,45 +149,45 @@ export default function AddProduct() {
             </h1>
             <form className='product-form'>
 
-                {/* ----------------- Product Image ----------------- */}
+                <div className="container">
+                    <div className="d-flex justify-content-between flex-lg-row flex-column mb-4">
 
-                <div className="product-image-container d-flex my-4">
-                    <div className="d-flex flex-column justify-content-center w-100">
-                        <label htmlFor="image">
-                            Add Image Of Your Product
-                            <br />
-                            <span style={{"fontSize":"13px"}}>
-                                Kindly Upload  image Without Background
-                            </span>
-                        </label>
-                        <input
-                            type="file"
-                            name="image"
-                            id="image"
-                            className='form-control w-50'
-                            onChange={handleImage}
-                        />
-                    </div>
-                    <div className="product-image">
-                        <img src={image} alt="" />
-                    </div>
-                </div>
+                        {/* ----------------- Product Image ----------------- */}
 
-                {/* ----------------- Product Title ----------------- */}
+                        <div className="product-image-container d-flex flex-column-reverse align-items-center justify-content-evenly my-4">
+                            <div className="d-flex flex-column justify-content-center w-100">
+                                <button className="container-btn-file">
+                                    Upload Image
+                                    <input
+                                        className="file"
+                                        type="file"
+                                        name="image"
+                                        id="image"
+                                        onChange={handleImage} />
+                                </button>
 
-                <div className="product-title-container d-flex justify-content-between align-items-center my-4">
-                    <div className="d-flex flex-column justify-content-center">
-                        <label htmlFor="title">
-                            Add Title Of Your Product
-                        </label>
-                        <input
-                            type="text"
-                            className='form-control mt-3'
-                            name="title"
-                            id="title"
-                            style={{ "border": "1px solid" }}
-                            onChange={handleChange}
-                        />
+                            </div>
+                            <div className="product-image">
+                                <img src={image} alt="" />
+                            </div>
+                        </div>
+
+                        {/* ----------------- Product Title ----------------- */}
+
+                        <div className="d-flex flex-column justify-content-center ms-4">
+                            <label htmlFor="title">
+                                Add Title Of Your Product
+                            </label>
+                            <input
+                                type="text"
+                                className='form-control mt-3'
+                                name="title"
+                                id="title"
+                                placeholder='Enter Title For your Item'
+                                style={{ "border": "1px solid", "fontSize": "15px" }}
+                                onChange={handleChange}
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -154,19 +197,19 @@ export default function AddProduct() {
                     Add Prices
                 </h3>
                 <div className="product-price-container d-flex  align-items-center mb-5">
-                        <div className="d-flex flex-row align-items-center ">
-                            <label htmlFor="title" style={{ "fontSize": "11px", "marginRight": "10px", "fontWeight": "800" }}>
-                                Add Current Price Of Your Product
-                            </label>
-                            <input
-                                type="number"
-                                className='form-control mt-3'
-                                name="currentPrice"
-                                id="oldPrice"
-                                style={{ "border": "1px solid", "width": "20%" }}
-                                onChange={handleChange}
-                            />
-                        </div>
+                    <div className="d-flex flex-row align-items-baseline ">
+                        <label htmlFor="title" style={{ "fontSize": "11px", "marginRight": "10px", "fontWeight": "800" }}>
+                            Add Current Price Of Your Product
+                        </label>
+                        <input
+                            type="number"
+                            className='form-control mt-3'
+                            name="currentPrice"
+                            id="oldPrice"
+                            style={{ "border": "1px solid", "width": "20%" }}
+                            onChange={handleChange}
+                        />
+                    </div>
                 </div>
 
                 {/* -------------------- Product Description -------------------- */}
@@ -193,16 +236,17 @@ export default function AddProduct() {
 
                 {/* -------------------- Submission Button -------------------- */}
 
-                <button className="btn btn-primary" onClick={handleProduct}>
+                <button className="submit-button" onClick={handleProduct}>
                     {
                         isLoading
-                        ?
-                        // console.log("firs/t")
-                        <ButtonLoader/>
-                        :
-                        "Add Product"
+                            ?
+                            // console.log("firs/t")
+                            <ButtonLoader />
+                            :
+                            "Add Product"
                     }
                 </button>
+
 
             </form>
         </main>
